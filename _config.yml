@@ -19,7 +19,7 @@ timezone:
 # ↓ --------------------------
 
 title: Home # the main title
-
+internal_title: Leandro Fróes
 tagline: Malware Researcher & Reverse Engineer  # it will display as the sub-title
 
 description: >- # used by seo meta and the atom feed
