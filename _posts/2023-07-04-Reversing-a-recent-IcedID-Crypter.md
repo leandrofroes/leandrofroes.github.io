@@ -29,7 +29,7 @@ The analyzed malware is a 64 bits DLL file and it's execution starts by calling 
 If we take a quick look at the file statically we can notice that there's a lot of exports available other than this "vcab":
 
 <p>
-    <img src="/assets/images/icedid_crypter/export_table.png" alt>
+    <img src="/assets/images/icedid_crypter/export_table.PNG" alt>
     <em>Malware export table</em>
 </p>
 
@@ -44,7 +44,7 @@ Once the export function is executed the malware executes multiple stages (basic
 The first thing performed by this export function is check if the process cmdline has a parameter named `/k` and a value for it. At this point there's no checks regarding the value passed and the content is just saved for further usage.
 
 <p>
-    <img src="/assets/images/icedid_crypter/get_cmdline.png" alt>
+    <img src="/assets/images/icedid_crypter/get_cmdline.PNG" alt>
     <em>Function responsible for getting the cmdline parameter.</em>
 </p>
 
@@ -57,12 +57,12 @@ In the analyzed sample, the configuration is present `0x16735` bytes after the b
 The module base address is obtained by using the function responsible for getting the config offset as a base address and then searching backwards until it finds both the PE Signature and the "MZ" Signature:
 
 <p>
-    <img src="/assets/images/icedid_crypter/get_config_offset.png" alt>
+    <img src="/assets/images/icedid_crypter/get_config_offset.PNG" alt>
     <em>Get config offset function.</em>
 </p>
 
 <p>
-    <img src="/assets/images/icedid_crypter/get_module_base.png" alt>
+    <img src="/assets/images/icedid_crypter/get_module_base.PNG" alt>
     <em>Get module base function.</em>
 </p>
 
@@ -99,12 +99,12 @@ The API Hashing technique is basically the parsing of the Loaded Modules List fr
 With the config in hands the next stages content (2, 3 and 4 specifically) is read and written to a memory location allocated using `VirtualAlloc`. A key is then read from the config (5c 3b 0c 00 in this case) and is used as a multibyte XOR key to "decrypt" (well, it's just XORed) the mentioned stages:
 
 <p>
-    <img src="/assets/images/icedid_crypter/xor_key_offset.png" alt>
+    <img src="/assets/images/icedid_crypter/xor_key_offset.PNG" alt>
     <em>XOR key located in the malware config.</em>
 </p>
 
 <p>
-    <img src="/assets/images/icedid_crypter/config_parse_and_stages_dec.png" alt>
+    <img src="/assets/images/icedid_crypter/config_parse_and_stages_dec.PNG" alt>
     <em>Config parsing and next stages decryption.</em>
 </p>
 
@@ -115,7 +115,7 @@ The decrypted content will be saved and passed to the next stage further on.
 The `LoadLibraryA` function is used to load a Windows DLL named `dpx.dll`. Once the base address of this DLL is obtained via the return value of `LoadLibraryA` it's PE headers are parsed and it's Export Directory obtained. It then gets the first exported function from the dpx.dll file (`DpxCheckJobExists` in this case):
 
 <p>
-    <img src="/assets/images/icedid_crypter/dpx_load_and_export.png" alt>
+    <img src="/assets/images/icedid_crypter/dpx_load_and_export.PNG" alt>
     <em>dpx.dll loading and export table parsing.</em>
 </p>
 
@@ -130,7 +130,7 @@ The final step of the Stage 0 (vcab export) is call the `DpxCheckJobExists` func
 5. The XOR key used to decrypt the Stage 2, 3 and 4
 
 <p>
-    <img src="/assets/images/icedid_crypter/stage1_dec_and_call.png" alt>
+    <img src="/assets/images/icedid_crypter/stage1_dec_and_call.PNG" alt>
     <em>Stage 1 decryption and call.</em>
 </p>
 
@@ -141,7 +141,7 @@ This stage is the first "shellcode" involved in the chain. In order to analyze i
 The beginning of this stage involves a lot of manipulation of the information received via parameter of the DpxCheckJobExists function. Other than that, a kind of new structure is created and receives some new information. We'll refer to this new structure as "final structure":
 
 <p>
-    <img src="/assets/images/icedid_crypter/final_struct_manipulation.png" alt>
+    <img src="/assets/images/icedid_crypter/final_struct_manipulation.PNG" alt>
     <em>Example of the final struct manipulation.</em>
 </p>
 
@@ -184,12 +184,12 @@ Stage 3:
 The [x64dbg](https://x64dbg.com/) view bellow shows an example of the Stage 3 content before and after the patch:
 
 <p>
-    <img src="/assets/images/icedid_crypter/pattern_search_1.png" alt>
+    <img src="/assets/images/icedid_crypter/pattern_search_1.PNG" alt>
     <em>Stage 3 before the function patch</em>
 </p>
 
 <p>
-    <img src="/assets/images/icedid_crypter/pattern_search_2.png" alt>
+    <img src="/assets/images/icedid_crypter/pattern_search_2.PNG" alt>
     <em>Stage 3 after the function patch.</em>
 </p>
 
@@ -200,7 +200,7 @@ At this point (specially in the injection part) most part of the API calls perfo
 It first parses the ntdll exports and creates a kind of list of structs containing the addresses of the real syscall stubs, organized in an ascending order based on it's SSN (System Service Number), followed by the hash of the syscall name (same ROR13 algorithm) and then the bytes (opcodes) responsible for performing the syscall instruction (let's say custom stub).
 
 <p>
-    <img src="/assets/images/icedid_crypter/syscall_1.png" alt>
+    <img src="/assets/images/icedid_crypter/syscall_1.PNG" alt>
     <em>Syscall stubs.</em>
 </p>
 
@@ -226,12 +226,12 @@ ret
 Once this list is created every time a function needs to be resolved it first sets the function arguments and then calls a function responsible for getting the proper custom stub. This function receives the base of the created stub list as well as the desired hash. The hash is then compared against each hash in the stub list and once it's found the respective custom stub is returned:
 
 <p>
-    <img src="/assets/images/icedid_crypter/syscall_2.png" alt>
+    <img src="/assets/images/icedid_crypter/syscall_2.PNG" alt>
     <em>Syscall stub resolving.</em>
 </p>
 
 <p>
-    <img src="/assets/images/icedid_crypter/syscall_3.png" alt>
+    <img src="/assets/images/icedid_crypter/syscall_3.PNG" alt>
     <em>Syscall stub example.</em>
 </p>
 
@@ -244,14 +244,14 @@ At this point the preparation to inject into a target process begins and the "sv
 First, the crypter obtains information from all the processes using the `NtQuerySystemInformation` function passing the `SystemProcessInformation` parameter to it. By using this parameter a struct of type `SYSTEM_PROCESS_INFORMATION` is returned for each available process. The field `ImageName` of this structure is obtained, the same hash algorithm used before is applied to it and then it's then compared against the expected "svchost" hash. If there's a match the process PID is obtained:
 
 <p>
-    <img src="/assets/images/icedid_crypter/get_proc_info.png" alt>
+    <img src="/assets/images/icedid_crypter/get_proc_info.PNG" alt>
     <em>Get list of process information.</em>
 </p>
 
 Since the next stages would be injected into svchost process the function responsible for the injection receives our "final structure" as a parameter. The injection function starts resolving multiple "custom syscall stubs" to be used:
 
 <p>
-    <img src="/assets/images/icedid_crypter/injfection_api_resolving.png" alt>
+    <img src="/assets/images/icedid_crypter/injfection_api_resolving.PNG" alt>
     <em>Injection stubs resolving.</em>
 </p>
 
@@ -262,12 +262,12 @@ The injection approach used by this crypter is via a basic APC injection. APCs a
 These calls are a kind of preventive measure to make sure there's a thread in svchost process in alertable state via the duplicated events being triggered:
 
 <p>
-    <img src="/assets/images/icedid_crypter/alertable_thread_check.png" alt>
+    <img src="/assets/images/icedid_crypter/alertable_thread_check.PNG" alt>
     <em>Queue an APC for each remote thread.</em>
 </p>
 
 <p>
-    <img src="/assets/images/icedid_crypter/wait_for_mult_object.png" alt>
+    <img src="/assets/images/icedid_crypter/wait_for_mult_object.PNG" alt>
     <em>Wait until an object is ready.</em>
 </p>
 
@@ -276,7 +276,7 @@ Once the proper thread is identified the function `WinHelpW` is overwritten with
 A new hex pattern (0xA1A2A3A4AB) is searched in the Stage 3 content and replaced by the main process handle and this handle is duplicated. This way the code injected in the target process would have access to the main process memory. The final step of Stage 1 is then call `NtQueueApcThread` function to queue the tampared `WinHelpW` function to the alertable thread, passing both the `WinHelpA` address and the "final struct" address in the main process to it:
 
 <p>
-    <img src="/assets/images/icedid_crypter/injection_final.png" alt>
+    <img src="/assets/images/icedid_crypter/injection_final.PNG" alt>
     <em>Write Stage 2 and 3 content and queue an APC.</em>
 </p>
 
@@ -285,7 +285,7 @@ A new hex pattern (0xA1A2A3A4AB) is searched in the Stage 3 content and replaced
 This is the first function executed inside the "svchost.exe" process and it's job is very straight forward: it creates a thread using `ZwCreateThreadEx` to call the tampered `WinHelpA` function (Stage 3) and passes the address of our "final structure" inside the main process (rundll32.exe) as the thread function parameter.
 
 <p>
-    <img src="/assets/images/icedid_crypter/winhelpw_1.png" alt>
+    <img src="/assets/images/icedid_crypter/winhelpw_1.PNG" alt>
     <em>WinHelpW call.</em>
 </p>
 
@@ -294,21 +294,21 @@ This is the first function executed inside the "svchost.exe" process and it's jo
 This stage is the one responsible for calling the final stage in this whole chain, which is the Snow Crypter loader (Stage 4). The first thing done here is get the content of the loader inside the "final structure". It does so by using the address passed as the thread parameter and calling the `ReadProcessMemory` function to read the content from this address. The access to the main process is possible cause a handle to it was written to this stage by stage 1 already:
 
 <p>
-    <img src="/assets/images/icedid_crypter/winhelpa_get_final_struct.png" alt>
+    <img src="/assets/images/icedid_crypter/winhelpa_get_final_struct.PNG" alt>
     <em>Read the final structure from the main process memory.</em>
 </p>
 
 The `LoadLibraryA` function is then called to load the `dpx.dll` module again, but now inside the "svchost.exe" process. The address of the `DpxCheckJobExists` function is resolved and replaced by the Stage 4 content (same approach applied by the Stage 0 payload). The screenshot bellow shows the DLL being loaded, the export being resolved and the Stage 4 content being written:
 
 <p>
-    <img src="/assets/images/icedid_crypter/winhelpa_stage4_decryption.png" alt>
+    <img src="/assets/images/icedid_crypter/winhelpa_stage4_decryption.PNG" alt>
     <em>DpxCheckJobExists export tampering.</em>
 </p>
 
 The tampered function (Stage 4) is then called via a `CreateThread` call, passing the "final struct" (now accesible locally) as the thread parameter:
 
 <p>
-    <img src="/assets/images/icedid_crypter/winhelpa_get_final_struct.png" alt>
+    <img src="/assets/images/icedid_crypter/winhelpa_get_final_struct.PNG" alt>
     <em>Stage 4 call via a new thread.</em>
 </p>
 
@@ -322,24 +322,24 @@ The result content is not exactly a valid PE file, it's more of a struct contain
 Regarding the decompression algorithm used, I'm assuming it's QuickLZ due to what I saw in IBM's report, but to be honest I know close to nothing about those type of algorithms so I'm just assuming it's true:
 
 <p>
-    <img src="/assets/images/icedid_crypter/stage4_1.png" alt>
+    <img src="/assets/images/icedid_crypter/stage4_1.PNG" alt>
     <em>Final payload decryption and decompression.</em>
 </p>
 
 <p>
-    <img src="/assets/images/icedid_crypter/unpacked_payload_1.png" alt>
+    <img src="/assets/images/icedid_crypter/unpacked_payload_1.PNG" alt>
     <em>Decompression result.</em>
 </p>
 
 <p>
-    <img src="/assets/images/icedid_crypter/unpacked_payload_2.png" alt>
+    <img src="/assets/images/icedid_crypter/unpacked_payload_2.PNG" alt>
     <em>Decompression result.</em>
 </p>
 
 The final step here is the old manual mapping technique. A region of memory is allocated and then the clean payload is mapped to it: it's dependencies resolved via `LoadLibrary` + `GetProcAddress`, realocation applied and so on. The final payload is a DLL and has it's `DllMain` function executed, followed by the previously mentioned `init` export function:
 
 <p>
-    <img src="/assets/images/icedid_crypter/stage4_2.png" alt>
+    <img src="/assets/images/icedid_crypter/stage4_2.PNG" alt>
     <em>Final payload map and execution.</em>
 </p>
 
@@ -350,12 +350,12 @@ In case you're only interested in the final payload I have some shortcuts for yo
 Considering the fact dpx.dll will be loaded at svchost.exe process and the execution will be transfered to the final IcedID payload at some point we can use tools like [Process Explorer](https://learn.microsoft.com/en-us/sysinternals/downloads/process-explorer), [System Informer](https://github.com/winsiderss/systeminformer) or [Process Hacker](https://processhacker.sourceforge.io/) and search for any process that has the `dpx.dll` loaded. If it's svchost.exe there's a high chance this is our target. After it we would just need to find an allocated region inside it that contains a PE file and dump it:
 
 <p>
-    <img src="/assets/images/icedid_crypter/process_hacker_1.png" alt>
+    <img src="/assets/images/icedid_crypter/process_hacker_1.PNG" alt>
     <em>dpx.dll search in Process Hacker.</em>
 </p>
 
 <p>
-    <img src="/assets/images/icedid_crypter/process_hacker_2.png" alt>
+    <img src="/assets/images/icedid_crypter/process_hacker_2.PNG" alt>
     <em>Allocated memory search in Process Hacker.</em>
 </p>
 
@@ -364,24 +364,24 @@ The downside of this approach is that the file would be already mapped in memory
 As we saw the earlier, the decompression function receives the decrypted final payload and returns the uncompressed one as well as it's size. If we perform a simple check in x64dbg hex dump we'll see there's 0x400 bytes (the headers) from the first byte of the file until the first byte of the .text section. Considering 0x400 is usually the value of the File Aligment field in the IMAGE_OPTIONAL_HEADER we can assume this is the final payload, clean and ready to be dumped! 
 
 <p>
-    <img src="/assets/images/icedid_crypter/unpacked_payload_3.png" alt>
+    <img src="/assets/images/icedid_crypter/unpacked_payload_3.PNG" alt>
     <em>Alignment of the decompressed payload.</em>
 </p>
 
 The only thing we need to do to dump it using x64dbg is select the 0x3400 bytes (unpacked payload size) in the hex dump -> Right Click -> Binary -> Save to File. And there we go! A clean payload to be analyzed. We can check it with [DIE](https://github.com/horsicq/Detect-It-Easy) and see some of the known IcedID strings and names:
 
 <p>
-    <img src="/assets/images/icedid_crypter/main_payload_2.png" alt>
+    <img src="/assets/images/icedid_crypter/main_payload_2.PNG" alt>
     <em>General information.</em>
 </p>
 
 <p>
-    <img src="/assets/images/icedid_crypter/main_payload_3.png" alt>
+    <img src="/assets/images/icedid_crypter/main_payload_3.PNG" alt>
     <em>Payload imports.</em>
 </p>
 
 <p>
-    <img src="/assets/images/icedid_crypter/main_payload_4.png" alt>
+    <img src="/assets/images/icedid_crypter/main_payload_4.PNG" alt>
     <em>Some famous IcedID strings.</em>
 </p>
 
